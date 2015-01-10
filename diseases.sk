@@ -1,0 +1,134 @@
+#hercore diseases
+#=============================================#
+#   Skrypt napisany przez: herhor67           #
+#   Nazwa: Diseases                           #
+#=============================================#
+#  Licencja skryptu:                          #
+# * Nie zezwalam na:                          #
+# - Usuwanie treści o autorze!                #
+# - Podszywanie się pod autora!               #
+# - Używanie kodu skryptu w swoich skryptach! #
+# - Zarabianie na skrypcie!                   #
+# - Wrzucanie skryptu do internetu!           #
+# * Zezwalam na:                              #
+# + Dodawanie kodu na swoja potrzebę!         #
+# + Modyfikowanie wiadomości!                 #
+#=============================================#
+variables:
+	{kupa.%player%} = false
+	{woda.%player%} = 60
+	{cieplo.%player%} = false
+	{zimno.%player%} = false
+	{zatrucie.%player%} = false
+	{noga.%player%} = false
+	{reka.%player%} = false
+
+on damage:
+	damage is caused by fall:
+		chance of 10%:
+			set {noga.%victim%} to true
+			apply Slowness 2 to victim for 9999999 days
+			send "&4Złamałeś sobie nogę. Ulecz się bandażem!" to victim
+
+on break:
+	player's tool is air:
+		chance of 1%:
+			set {reka.%player%} to true
+			send "&4Złamałeś sobie rękę. Ulecz się bandażem!"
+
+on click:
+	player's tool is paper:
+		{reka.%player%} is true:
+			remove 1 paper from player
+			send "&6Leczysz swoją rękę"
+			wait 10 seconds
+			set {reka.%player%} to false
+			send "&2Zostałeś uleczony"
+		else:
+			{noga.%player%} is true:
+				remove 1 paper from player
+				send "&6Leczysz swoją nogę"
+				wait 10 seconds
+				set {noga.%player%} to false
+				send "&2Zostałeś uleczony"
+				remove Slowness from player
+	else:
+		{reka.%player%} is true:
+			cancel event
+			send "&4Masz złamanę rękę, nie możesz kopać! Ulecz się bandażem!"
+
+at 6am:
+	loop all players:
+		set {kupa.%loop-player%} to true
+	broadcast "&6Idź zrobić kupę"
+at 12pm:
+	loop all players:
+		{kupa.%loop-player%} is true:
+			apply Nausea to loop-player for 10 seconds
+			set {kupa.%loop-player%} to false
+
+on sneak toggle:
+	{kupa.%player%} is true:
+		loop blocks in radius 2 around the player:
+			if loop-block is cauldron:
+				set {kupa.%player%} to false
+				send "&2Zrobiłeś kupę"
+
+on drink of water bottle:
+	{woda.%player%} is less than 50:
+		add 10 to {woda.%player%}
+		send "&2Uff, jak dobrze sie napić wody..."
+	else:
+		send "&6Już się napiłeś wystarczająco"
+
+on drink of milk bucket:
+	{woda.%player%} is less than 45:
+		add 15 to {woda.%player%}
+		send "&2Uff, jak dobrze się napić mleka..."
+	else:
+		send "&6Już się napiłeś wystarczająco"
+ 
+every second:
+	loop all players:
+		biome at the loop-player is desert or desert hills or jungle or jungle hills:
+			set {zimno.%loop-player%} to false
+			set {cieplo.%loop-player%} to true
+			chance of 1%:
+				send "&4Czemu tu tak cieplo..." to loop-player
+		biome at loop-player is taiga or frozen ocean or frozen river or ice plains or ice mountains or taiga hills:
+			set {cieplo.%loop-player%} to false
+			loop-player is not wearing all leather armor:
+				set {zimno.%loop-player%} to true
+				chance of 1%:
+				send "&4Czemu tu tak zimno..." to loop-player
+
+command /woda:
+	trigger:
+		send "&2Twój poziom wody to &c%{woda.%player%}%"
+ 
+every minute:
+	loop all players:
+		remove 1 from {woda.%loop-player%}
+		{cieplo.%loop-player%} is true:
+			remove 1 from {woda.%loop-player%}
+		{zimno.%loop-player%} is true:
+			remove 1 from {woda.%loop-player%}
+		{woda.%loop-player%} is less than 11:
+			apply Nausea to loop-player for 10  seconds
+			apply Slowness to loop-player for 60 seconds
+			apply Mining fatigue 2 to loop-player for 60 seconds
+			apply Blindness to loop-player for 2 seconds
+			send "&4Wody!" to loop-player
+		{zatrucie.%loop-player%} is true:
+			apply Nausea to loop-player for 30 seconds
+			send "&4Ale mnie boli brzuch..." to loop-player
+			wait 30 seconds
+			set {zatrucie.%loop-player%} to false
+			send "&2Już lepiej." to loop-player
+
+on consume:
+	chance of 10%:
+		set {zatrucie.%player%} to true
+
+# End of File #
+# Thanks 4 using #
